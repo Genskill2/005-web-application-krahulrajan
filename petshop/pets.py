@@ -136,12 +136,27 @@ def edit(pid):
     elif request.method == "POST":
         description = request.form.get('description')
         sold = request.form.get("sold")
-        # TODO Handle sold
-        date = datetime.date.today()
-        cursor.execute("update pet set description = ? from tags_pets tp where tp.pet = ? and tp.pet=pet.id",[description,pid])
-        conn.commit()
-        cursor.execute("update pet  set sold = ? from tags_pets tp where tp.pet = ? and tp.pet=pet.id", [date,pid])
-        conn.commit()
+        cursor.execute("select p.sold from pet p where p.id = ?", [pid])
+        pet_sold = cursor.fetchone()
+        sold_date, = pet_sold
+        sql_update_query = """update pet set description = ?, sold = ? where id = ?"""
+
+        if sold_date!='' and not sold:
+            data = (description, '', pid)
+            cursor.execute(sql_update_query, data)    
+            conn.commit()
+        
+        if sold_date=='' and sold:
+            today = datetime.date.today().strftime('%Y-%m-%d')
+            data = (description, today, pid)
+            cursor.execute(sql_update_query, data)    
+            conn.commit()
+
+        else:
+            sql_update_query = """update pet set description = ? where id = ?"""
+            data = (description, pid)
+            cursor.execute(sql_update_query, data)    
+            conn.commit()
         return redirect(url_for("pets.pet_info", pid=pid), 302)
         
     
