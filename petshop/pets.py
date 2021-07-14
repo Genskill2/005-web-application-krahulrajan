@@ -138,6 +138,8 @@ def edit(pid):
         sold = request.form.get("sold")
         # TODO Handle sold
         date = datetime.date.today()
+        cursor.execute("update pet set description = ? from tags_pets tp where tp.pet = ? and tp.pet=pet.id",[description,pid])
+        conn.commit()
         cursor.execute("update pet  set sold = ? from tags_pets tp where tp.pet = ? and tp.pet=pet.id", [date,pid])
         conn.commit()
         return redirect(url_for("pets.pet_info", pid=pid), 302)
